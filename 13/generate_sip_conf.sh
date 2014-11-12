@@ -1,6 +1,15 @@
 #!/bin/sh
 set -eu
 
+## key, pub
+TLSCAFILE=$(find /etc/asterisk/ -type f -name "*.key")
+TLSCERTFILE=$(find /etc/asterisk/ -type f -name "*.pub")
+if [ -z $TLSCAFILE -o -z $TLSCERTFILE ];then
+    echo "[quit] /etc/asterisk/*.{key,pub}が見つかりません。"
+    echo "astgenkeyコマンドで生成してください。"
+    exit 1
+fi
+
 ## [050plusからasterisk用の接続情報を取得する用]
 # 050電話番号
 echo -n "(1/3) Enter 050plus tel number : "
@@ -14,14 +23,14 @@ stty echo
 # -------------
 
 get_xml() {
-wget -q \
-  -O ${TEL}.xml \
-  --no-check-certificate \
-  --secure-protocol=auto \
-  --server-response \
-  --post-data \
-  "ifVer=2.0&apVer=2.0.4&buildOS=IOS&buildModel=iPhone4,1&buildVer=5.1&no050=${TEL}&pw050=${PASS}" \
-  "https://start.050plus.com/sFMCWeb/other/InitSet.aspx"
+  wget -q \
+    -O ${TEL}.xml \
+    --no-check-certificate \
+    --secure-protocol=auto \
+    --server-response \
+    --post-data \
+    "ifVer=2.0&apVer=2.0.4&buildOS=IOS&buildModel=iPhone4,1&buildVer=5.1&no050=${TEL}&pw050=${PASS}" \
+    "https://start.050plus.com/sFMCWeb/other/InitSet.aspx"
 }
 
 get_config() {
@@ -29,7 +38,9 @@ get_config() {
 }
 
 ## [main]
-#get_xml
+if [ ! -r ${TEL}.xml ];then
+    get_xml
+fi
 nicNm=`get_config nicNm`
 sipPwd=`get_config sipPwd`
 sipID=`get_config sipID`
@@ -54,8 +65,8 @@ context=default
 ;TLS settings
 tlsenable=yes
 tlsbindaddr=0.0.0.0
-tlscertfile="/etc/asterisk/keys/asterisk.pem"
-tlscafile="/etc/asterisk/keys/ca.crt"
+tlscertfile="${TLSCERTFILE}"
+tlscafile="${TLSCAFILE}"
 tlscipher=ALL
 tlsclientmethod=tlsv1
 tlsdontverifyserver=yes ; TLSのサーバーのCommonNameの検証を無効にする
@@ -83,5 +94,5 @@ nat=yes
 EOF
 
 echo '[done]'
-echo '[info] sudo sh -c "cat sip.conf > /srv/asterisk11/etc/asterisk/sip.conf"'
+echo '[info] sudo sh -c "cat sip.conf > /etc/asterisk/sip.conf"'
 ls -lh sip.conf
