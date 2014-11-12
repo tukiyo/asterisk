@@ -23,6 +23,7 @@ stty echo
 # -------------
 
 get_xml() {
+  set -eux
   wget -q \
     -O ${TEL}.xml \
     --no-check-certificate \
@@ -31,6 +32,7 @@ get_xml() {
     --post-data \
     "ifVer=2.0&apVer=2.0.4&buildOS=IOS&buildModel=iPhone4,1&buildVer=5.1&no050=${TEL}&pw050=${PASS}" \
     "https://start.050plus.com/sFMCWeb/other/InitSet.aspx"
+  set +x
 }
 
 get_config() {
