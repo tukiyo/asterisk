@@ -1,0 +1,61 @@
+; 参考:
+; http://www.voip-info.jp/index.php/Asterisk_FUSION
+; http://www.voip-info.jp/index.php/FUSION_IP-Phone_SMART
+
+[general]
+maxexpirey=3600
+defaultexpirey=3600
+registertimeout=300
+context=incoming ;incoming固定
+port=5060
+bindaddr=0.0.0.0
+srvlookup=yes
+disallow=all
+allow=ulaw
+allow=alaw
+allow=gsm
+language=ja
+localnet=192.168.0.0/255.255.0.0
+
+allowguest=yes ;yes固定
+
+;[fusion1]
+register => FUSIONユーザ名:FUSIONパスワード@fusion1/smart.0038.net
+
+[fusion1]
+type=friend
+username=FUSIONユーザ名
+fromuser=FUSIONユーザ名
+secret=FUSIONパスワード
+canreinvite=no
+context=incoming
+insecure=port,invite
+host=smart.0038.net
+fromdomain=smart.0038.net
+dtmfmode=inband
+allowsubscribe=no
+nat=never
+
+[201]
+type=friend
+defaultuser=201
+secret=pass201
+context=default ;default固定
+canreinvite=no
+host=dynamic
+dtmfmode=rfc2833
+callgroup=1
+pickupgroup=1
+mailbox=201
+
+[202]
+type=friend
+defaultuser=202
+secret=pass202
+context=default
+canreinvite=no
+host=dynamic
+dtmfmode=rfc2833
+callgroup=1
+pickupgroup=1
+mailbox=202
